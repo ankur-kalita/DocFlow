@@ -6,7 +6,7 @@ import { Dashboard } from './pages/dashboard';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  return isAuthenticated ? children : <Navigate to="/" />;
+  return isAuthenticated ? children : <Navigate to="/login" />;
 }
 
 function App() {
@@ -15,7 +15,7 @@ function App() {
       <div className="min-h-screen bg-gray-50">
         <Routes>
           <Route
-            path="/"
+            path="/login"
             element={
               <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
                 <LoginForm />
@@ -23,7 +23,7 @@ function App() {
             }
           />
           <Route
-            path="/dashboard"
+            path="/"
             element={
               <PrivateRoute>
                 <Dashboard />

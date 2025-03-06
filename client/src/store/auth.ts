@@ -13,10 +13,13 @@ interface AuthState {
   logout: () => void;
   checkAuth: () => void;
 }
+console.log(localStorage.getItem("token"));
+console.log(localStorage.getItem("token") ? true : false,);
 
 export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  isAuthenticated: false,
+  user: localStorage.getItem("token") ? JSON.parse(localStorage.getItem("token") || "") : null,
+  isAuthenticated: localStorage.getItem("token") ? true : false,
+  
 
   // Login function - Calls backend API
   login: async (email: string, password: string) => {

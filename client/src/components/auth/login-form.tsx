@@ -16,7 +16,7 @@ export function LoginForm() {
 
     try {
       await login(email, password);
-      navigate('/dashboard');
+      navigate('/');
     } catch (err) {
       setError('Invalid credentials');
       console.log(err);
