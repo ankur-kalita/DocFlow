@@ -8,6 +8,7 @@ interface User {
 
 interface AuthState {
   user: User | null;
+  token: string | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
@@ -17,14 +18,15 @@ console.log(localStorage.getItem("token"));
 console.log(localStorage.getItem("token") ? true : false,);
 
 export const useAuthStore = create<AuthState>((set) => ({
-  user: localStorage.getItem("token") ? JSON.parse(localStorage.getItem("token") || "") : null,
+  user: null,
+  token: localStorage.getItem("token") ? localStorage.getItem("token"): null,
   isAuthenticated: localStorage.getItem("token") ? true : false,
   
 
   // Login function - Calls backend API
   login: async (email: string, password: string) => {
   try {
-    const response = await fetch("http://localhost:5000/api/auth/login", {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -65,7 +67,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   checkAuth: () => {
     const token = localStorage.getItem("token");
     if (token) {
-      fetch("http://localhost:5000/api/auth/me", {
+      fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/me`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,

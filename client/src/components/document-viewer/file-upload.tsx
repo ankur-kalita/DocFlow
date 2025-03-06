@@ -31,7 +31,7 @@ export function FileUpload({ onFileSelect, accept }: FileUploadProps) {
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await fetch("http://localhost:5000/api/pdf/upload", {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/pdf/upload`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
