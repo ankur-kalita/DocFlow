@@ -7,8 +7,13 @@ import { Button } from '@/components/ui/button';
 import { FileUpload } from '@/components/document-viewer/file-upload';
 import PDFViewer from '@/components/document-viewer/pdf-viewer';
 
+interface SelectedFileData {
+  file: File;
+  extractedText: string;
+}
+
 export function Dashboard() {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFileData, setSelectedFileData] = useState<SelectedFileData | null>(null);
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
 
@@ -17,8 +22,8 @@ export function Dashboard() {
     navigate('/');
   };
 
-  const handleFileSelect = (file: File) => {
-    setSelectedFile(file);
+  const handleFileSelect = (data: SelectedFileData) => {
+    setSelectedFileData(data);
   };
 
   return (
@@ -73,11 +78,11 @@ export function Dashboard() {
                     ['.docx'],
                 }}
               />
-              {selectedFile && (
+              {selectedFileData && (
                 <div className="mt-6 p-4 bg-indigo-50 rounded-lg">
                   <p className="text-sm text-indigo-700 flex items-center">
                     <FileText className="h-4 w-4 mr-2" />
-                    Selected file: {selectedFile.name}
+                    Selected file: {selectedFileData.file.name}
                   </p>
                 </div>
               )}
@@ -86,8 +91,8 @@ export function Dashboard() {
 
           <TabsContent value="view">
             <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-              {selectedFile ? (
-                <PDFViewer file={selectedFile} />
+              {selectedFileData ? (
+                <PDFViewer file={selectedFileData.file} extractedText={selectedFileData.extractedText} />
               ) : (
                 <div className="text-center py-12">
                   <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
