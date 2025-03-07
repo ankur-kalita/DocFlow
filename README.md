@@ -177,7 +177,7 @@ This ensures the file exists and prevents the error from occurring.
 
 ---
 🚀 **Now, your project should run smoothly!** 🚀  
-```
+
 
 ## 📂 Project Structure
 
