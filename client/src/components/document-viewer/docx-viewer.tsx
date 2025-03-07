@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { renderAsync } from "docx-preview";
 import mammoth from "mammoth";
+import { saveAs } from "file-saver";
 
 interface DocxViewerProps {
   file: File;
@@ -39,6 +40,27 @@ function DocxViewer({ file }: DocxViewerProps) {
     loadDocx();
   }, [file]);
 
+  // Handler to track user edits
+//   const handleEdit = (event: React.FormEvent<HTMLDivElement>) => {
+//     setHtmlContent(event.currentTarget.innerHTML);
+//   };
+
+  // Save the edited content as a new DOCX file
+  const handleSave = async () => {
+    try {
+      // Convert HTML back to a DOCX document
+      const blob = new Blob([htmlContent], {
+        type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      });
+
+      saveAs(blob, "edited-document.docx");
+      alert("File saved successfully!");
+    } catch (error) {
+      alert("Failed to save the file.");
+      console.error(error);
+    }
+  };
+
   return (
     <div className="p-6">
       <h2 className="text-lg font-bold">DOCX Viewer & Editor</h2>
@@ -57,14 +79,12 @@ function DocxViewer({ file }: DocxViewerProps) {
           <div 
             className="border p-4 min-h-[400px]" 
             contentEditable={true}
+            // onInput={handleEdit}
             dangerouslySetInnerHTML={{ __html: htmlContent }}
           ></div>
           <button 
             className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
-            onClick={() => {
-              // Implement save functionality here
-              alert("Save functionality to be implemented");
-            }}
+            onClick={handleSave}
           >
             Save Changes
           </button>

@@ -9,8 +9,11 @@
     "docx-preview": "^0.3.4",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "file-saver": "^2.0.5",
     "file-upload": "^0.0.0",
     "fs-extra": "^11.3.0",
+    "html-docx-js": "^0.3.1",
+    "html-to-docx": "^1.8.0",
     "jsonwebtoken": "^9.0.2",
     "mammoth": "^1.9.0",
     "mongodb": "^6.14.2",
@@ -23,5 +26,10 @@
     "pdfreader": "^3.0.7",
     "sharp": "^0.33.5",
     "tesseract.js": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/file-saver": "^2.0.7",
+    "@types/html-docx-js": "^0.3.4",
+    "@types/html-to-docx": "^1.8.0"
   }
 }

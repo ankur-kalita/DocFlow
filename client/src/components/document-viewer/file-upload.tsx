@@ -51,7 +51,9 @@ export function FileUpload({ accept }: FileUploadProps) {
         }
 
         const data = await response.json();
+        console.groupCollapsed(data);
         navigate("/pdf-viewer", { state: { file, extractedText: data.text } });
+        // navigate("/", {state: { file, extractedText: data.text }} )
       } catch (err) {
         setError((err as Error).message || "An unknown error occurred.");
       } finally {
