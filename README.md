@@ -109,28 +109,27 @@ PORT
 
 For detailed API documentation, visit **[http://localhost:5000/api/docs](http://localhost:5000/api/docs)**.
 
-* Using Postman first register and then login and then sign in in the browser.
+* Using Postman to first register and then login and then sign in in the browser.
 
 ---
 
 
-```markdown
+markdown
 ## ⚠️ Warning: ENOENT Error in `pdf-parse`
 
 If you encounter the following error during deployment or execution:
 
-```
+
 Error: ENOENT: no such file or directory, open './test/data/05-versions-space.pdf'
     at Object.openSync (node:fs:561:18)
     at Object.readFileSync (node:fs:445:35)
     at Object.<anonymous> (/opt/render/project/src/server/node_modules/pdf-parse/index.js:15:25)
-```
 
 ### 🔍 **Solution**
 1. **Go to the file** located at:
-   ```
+   
    server/node_modules/pdf-parse/index.js:15:25
-   ```
+   
 2. **Modify the code** to disable the debug mode.  
    - Find the following block and either **comment it out** or **remove it**:
 
