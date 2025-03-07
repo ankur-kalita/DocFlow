@@ -113,6 +113,73 @@ For detailed API documentation, visit **[http://localhost:5000/api/docs](http://
 
 ---
 
+
+```markdown
+## ⚠️ Warning: ENOENT Error in `pdf-parse`
+
+If you encounter the following error during deployment or execution:
+
+```
+Error: ENOENT: no such file or directory, open './test/data/05-versions-space.pdf'
+    at Object.openSync (node:fs:561:18)
+    at Object.readFileSync (node:fs:445:35)
+    at Object.<anonymous> (/opt/render/project/src/server/node_modules/pdf-parse/index.js:15:25)
+```
+
+### 🔍 **Solution**
+1. **Go to the file** located at:
+   ```
+   server/node_modules/pdf-parse/index.js:15:25
+   ```
+2. **Modify the code** to disable the debug mode.  
+   - Find the following block and either **comment it out** or **remove it**:
+
+   ```js
+   const Fs = require('fs');
+   const Pdf = require('./lib/pdf-parse.js');
+
+   module.exports = Pdf;
+
+   let isDebugMode = false; // Set this to false to disable debug mode
+
+   // Comment out or remove the debug code
+   /*
+   if (isDebugMode) {
+       let PDF_FILE = './test/data/05-versions-space.pdf';
+       let dataBuffer = Fs.readFileSync(PDF_FILE);
+       Pdf(dataBuffer).then(function(data) {
+           Fs.writeFileSync(`${PDF_FILE}.txt`, data.text, {
+               encoding: 'utf8',
+               flag: 'w'
+           });
+           debugger;
+       }).catch(function(err) {
+           debugger;
+       });
+   }
+   */
+   ```
+
+3. **Save the file and restart your server.**  
+
+### ✅ **Why This Fix Works?**
+The error occurs because `pdf-parse` is trying to read a **test PDF file** that doesn't exist in the deployed environment.  
+Disabling the debug mode prevents this unnecessary file access.
+
+---
+
+💡 If you still face issues, consider adding a **dummy PDF file** in the expected location:
+```sh
+mkdir -p test/data
+touch test/data/05-versions-space.pdf
+```
+
+This ensures the file exists and prevents the error from occurring.
+
+---
+🚀 **Now, your project should run smoothly!** 🚀  
+```
+
 ## 📂 Project Structure
 
 ### **Frontend (React)**
