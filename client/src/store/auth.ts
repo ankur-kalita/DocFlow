@@ -14,8 +14,7 @@ interface AuthState {
   logout: () => void;
   checkAuth: () => void;
 }
-console.log(localStorage.getItem("token"));
-console.log(localStorage.getItem("token") ? true : false,);
+
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,

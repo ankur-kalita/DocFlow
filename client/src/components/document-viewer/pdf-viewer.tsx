@@ -10,49 +10,72 @@ interface PDFViewerProps {
   extractedText?: string;
 }
 
+interface TableMerge {
+  row: number;
+  col: number;
+  width: number;
+  height: number;
+}
+
+interface PageData {
+  page: number;
+  tables: string[][];
+  merges?: Record<string, TableMerge>;
+  merge_alias?: Record<string, string>;
+  width?: number;
+  height?: number;
+}
+
 function PDFViewer({ file, extractedText: initialExtractedText }: PDFViewerProps) {
   const [numPages, setNumPages] = useState<number>(0);
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [extractedText, setExtractedText] = useState<string>(initialExtractedText || "");
-  const [loading, setLoading] = useState(false);
+  const [extractedTables, setExtractedTables] = useState<PageData[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const extractTextFromPDF = async () => {
+      setExtractedText("");
+      setExtractedTables([]);
+      setError(null);
+      setLoading(true);
+      
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/pdf/upload`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: formData,
+          credentials: 'include',
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('Tables data structure:', data.tables);
+
+        setExtractedText(data.text);
+        if (data.tables) {
+          setExtractedTables(data.tables);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An unknown error occurred.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    
     if (file && !initialExtractedText) {
       extractTextFromPDF();
     }
   }, [file, initialExtractedText]);
-
-  const extractTextFromPDF = async () => {
-    setExtractedText("");
-    setError(null);
-    setLoading(true);
-
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/pdf/upload`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: formData,
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      setExtractedText(data.text);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An unknown error occurred.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handlePageChange = (newPageNumber: number) => {
     setPageNumber(Math.max(1, Math.min(newPageNumber, numPages)));
@@ -107,6 +130,37 @@ function PDFViewer({ file, extractedText: initialExtractedText }: PDFViewerProps
         <div className="mt-4 p-4 bg-gray-100 border rounded w-full max-w-3xl">
           <h3 className="font-semibold">Extracted Text:</h3>
           <pre className="whitespace-pre-wrap text-sm overflow-auto max-h-60">{extractedText}</pre>
+        </div>
+      )}
+
+      {/* Extracted Tables Output */}
+      {extractedTables.length > 0 && (
+        <div className="mt-4 p-4 bg-gray-100 border rounded w-full max-w-3xl">
+          <h3 className="font-semibold">Extracted Tables:</h3>
+          {extractedTables.map((pageData, pageIndex) => (
+            <div key={pageIndex} className="mb-6">
+              <h4 className="font-medium mb-2">Page {pageData.page}</h4>
+              {pageData.tables && Array.isArray(pageData.tables) && (
+                <div className="space-y-4">
+                  {pageData.tables.filter(row => row.some(cell => cell.trim() !== '')).map((row, rowIndex) => (
+                    <div key={rowIndex} className="overflow-x-auto">
+                      <table className="min-w-full border-collapse border border-gray-300">
+                        <tbody>
+                          <tr>
+                            {row.map((cell, cellIndex) => (
+                              <td key={cellIndex} className="border border-gray-300 p-2 text-sm">
+                                {cell}
+                              </td>
+                            ))}
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       )}
     </div>

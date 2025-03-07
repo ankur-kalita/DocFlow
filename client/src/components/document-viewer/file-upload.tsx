@@ -1,15 +1,16 @@
 import React, { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { Upload } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface FileUploadProps {
-  onFileSelect: (data: { file: File; extractedText: string }) => void;
-  accept?: Record<string, string[]>;
+  accept?: Record<string, string[]>; // Allow custom accepted file types
 }
 
-export function FileUpload({ onFileSelect, accept }: FileUploadProps) {
+export function FileUpload({ accept }: FileUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const MAX_SIZE = 10 * 1024 * 1024; // 10MB limit
 
@@ -27,38 +28,48 @@ export function FileUpload({ onFileSelect, accept }: FileUploadProps) {
     setUploading(true);
     setError(null);
 
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
+    const fileType = file.name.split(".").pop()?.toLowerCase();
 
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/pdf/upload`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: formData,
-        credentials: "include",
-      });
+    // If it's a PDF, upload it to the API
+    if (fileType === "pdf") {
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to upload file.");
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/pdf/upload`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: formData,
+          credentials: "include",
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Failed to upload file.");
+        }
+
+        const data = await response.json();
+        navigate("/pdf-viewer", { state: { file, extractedText: data.text } });
+      } catch (err) {
+        setError((err as Error).message || "An unknown error occurred.");
+      } finally {
+        setUploading(false);
       }
-
-      const data = await response.json();
-      onFileSelect({ file, extractedText: data.text });
-      setError(null);
-    } catch (err) {
-      setError((err as Error).message || "An unknown error occurred.");
-    } finally {
-      setUploading(false);
     }
-  }, [onFileSelect]);
+    // If it's a DOCX, just navigate without API processing
+    else if (fileType === "docx") {
+      navigate("/docx-editor", { state: { file } });
+    } else {
+      setError("Unsupported file type. Please upload a PDF or DOCX file.");
+    }
+  }, [navigate]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     multiple: false,
-    accept: accept || { "application/pdf": [".pdf"] },
+    accept: accept || { "application/pdf": [".pdf"], "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"] },
   });
 
   return (
@@ -80,7 +91,7 @@ export function FileUpload({ onFileSelect, accept }: FileUploadProps) {
             <>
               <span className="font-semibold">Click to upload</span> or drag and drop
               <br />
-              <span className="text-gray-500">PDF (max 10MB)</span>
+              <span className="text-gray-500">PDF or DOCX (max 10MB)</span>
             </>
           )}
         </p>
