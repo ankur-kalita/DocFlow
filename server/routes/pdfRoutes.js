@@ -2,6 +2,8 @@ import express from "express";
 import multer from "multer";
 import { extractTables } from "../controllers/pdfController.js";
 import { authenticateToken } from "../middleware/authMiddleware.js";
+import { processDocx } from "../controllers/docxController.js";
+
 
 const router = express.Router();
 
@@ -41,5 +43,20 @@ router.post("/upload", authenticateToken, upload.single("file"), async (req, res
     return res.status(500).json({ message: error.message });
   }
 });
+
+// Configure multer for DOCX
+const docxUpload = multer({
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype !== "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+      return cb(new Error("Only DOCX files are allowed"), false);
+    }
+    cb(null, true);
+  },
+});
+
+// Add DOCX routes
+router.post("/docx/upload", authenticateToken, docxUpload.single("file"), processDocx);
 
 export default router;
